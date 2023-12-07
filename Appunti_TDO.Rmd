@@ -1,0 +1,989 @@
+---
+title: "Appunti TDO"
+author: "Daniele Iacobone"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: default
+  word_document: default
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Prof. Cremonini Marco
+
+## Strumenti e primi passi
+
+### Tidyverse
+
+Tidyverse è un pacchetto fondamentale per la data science ed è gestito direttamente da R Studio. Questo pacchetto contiene altri pacchetti fondamentali come "ggplot", "readr", "dplyr"... Un pacchetto quindi contiene delle funzionalità, lo scopo è quello di essere utile per installare alcune funzionalità. Guardare un po il sito di tidyverse.org, che offre una descrizione dei vari pacchetti inclusi e le varie funzionalità. Per installarlo è sufficiente la funzione install.packages e insreire l'argomento tra le ''. La seconda operazione da fare è caricare la libreria del pacchetto. Non vengono pre caricate per questioni di RAM. Per caricare la libreria di un pacchetto:
+
+```{r Libreria tidyverse}
+library(tidyverse)
+```
+
+Solitamente i pacchetti e le librerie vengono caricate all'inzio del file. Il risultato dell'esecuzione dice che sono stati caricati i pacchetti, ci sono però dei conflitti come nella funzione filter() nel pacchetto dplyr. La funzione filter() di dplyr maschera la funzione filter() del pacchetto stats. Lo stesso con la funzione log(). Per usare la funzione mascherata bisognerà scrivere ad esempio, stats::filter().
+
+### R Studio
+
+R Studio è un integrated environment (IDE) per la programmazione in R. R Studio oggi è gestito dall'azienda Posit, è considerato uno dei migliori IDE esistenti, e la versione Desktop è gratuita e Open Source. Hanno cambiato nome in Posit perchè è possibile usare sia il linguaggio R che il linguaggio Python. R Studio ha 4 quadranti, il primo in alto a sinistra serve per scrivere gli script, cioè le istruzioni da eseguire. Il secondo quadrante è console e terminal. La console è una sorta di terminale dove si possono eseguire i comandi, ma soprattutto qui vengono visualizzati i risultati di ciò che viene eseguito nello script. Questa parte di console è importante per vededre ill risultato delle esecuzioni delle nostre operazioni. Non è corretto scrivere le istruzioni nella console, questo perchè per cambiarle poi va riscritto tutto, inoltre è difficile identificare la logica. Ciò che viene scritto nella console viene facilmente perso. Nel terzo quadrante si vedono gli oggetti salvati nella memoria, ad esempio file importati. Infine, il quadrante 4 ci fa spostare tra le directory, vedere grafici, installare e vedere i pacchetti installati.
+
+### I packages
+
+I packages sono prodotti dalla community e permettono di eseguire compiti non standard, permettendo di ampliare le possibilità e funzionalità di R Studio. Questi pacchetti sono contenuti all'interno dell'archivio CRAN.
+
+### Calcoli
+
+```{r Calcoli semplici}
+2 + 30 * 70 / 100
+```
+
+Ci sono degli ordini che vengono rispettati, il \* e il / hanno precedenza rispetto al + e al -. Con le parentesi si da precedenza ad una operazione rispetto ad un'altra
+
+```{r Precedenza nelle operazioni}
+(2 + 30) * 70 / 100
+```
+
+```{r Somma di variabili}
+a = 10
+b = 20
+a + b
+```
+
+Viene errore perchè non ho definito c, posso però attribuire a c un valore. Quando voglio affidare ad un valore una sequenza alfa-numerica, devo usare le "
+
+```{r Variabile carattere}
+c = "ABC"
+```
+
+Ovviamente, non posso sommare valori numerici con valori alfa-numerici (ad esempio a + b + c)
+
+```{r Calcoli con variabili}
+a = 30
+b = 80
+a * b
+```
+
+L'estensione non cambia il contenuto di un file, .R apre R Studio; mentre quando schiaccio .txt apre un editor di testo quando clicco sul file. I commenti vengono aggiunti premendo il \# prima del testo. I commenti sono utili per spiegare cosa si sta facendo o cosa si è fatto. Più sono gli \# più si rimpicciolisce il testo. Per eseguire una funzione è sufficiente selezionarla e premere 'Run' in alto a destra, oppure Command e Invio.
+
+### Variabili
+
+```{r Moltiplicazione e divisione}
+a = 100
+b = 50
+
+(a - b) * 100 
+(a - b) / 3
+```
+
+Se avessi un'operazione molto complessa questa non sarebbe la soluzione più immediata, converrebbe salvare una variabile (a - b)
+
+```{r Sottrazione variabili}
+c <- a - b
+c
+```
+
+Ora posso semplificare le operazioni di sopra sostituendo con c
+
+```{r Semplificazione}
+c * 100
+c / 3
+```
+
+### Datasets
+
+I dati che useremo nel corso sono open-data. Alcuni sono pre-installati in R Studio. Uno ad esempio è il pacchetto "datasets", un archivio di dati di esempio. Nel caso dei dataset predefiniti è sufficiente scrivere il nome del dataset.
+
+```{r Cars}
+summary(cars)
+```
+
+### Alcune funzioni essenziali
+
+A volte serve vedere le prime righe per farsi una prima idea del dataset. Può anche essere utile vedere le ultime righe nel caso in cui i valori fossero ordinati. Due funzioni utili sono:
+
+```{r Head e Tail}
+head(cars) # Per visualizzare le prime 6 righe 
+tail(cars) # Per visualizzare le ultime 6 righe
+```
+
+```{r Altro di head}
+# Per vedere più righe basta scrivere una , dopo il nome del dataset e il numero di righe che vogio visualizzare
+head(cars, 10)
+
+# Lo stesso vale per la funzione tail()
+```
+
+### Text editors
+
+Installare un editor di testo, per Mac: Sublime Text.
+
+## Organizzazione dei dati
+
+### Formato CSV
+
+CSV sta per Comma Separated Values, ed identifica file di testo organizzait in forma tabellare. Il formato è plain text - puro testo, non ci sono neanche metadati come ad esempio la data di creazione, etc. Il formayto ha due regole molto semplici, ogni riga è composta da valori separati da un carattere predefinito (virgola, punto e virgola e tab e altre eccezioni) e terminata da un ritorno a capo. Inoltre, ogni riga ha un numero uguale di valori divisi dal separatore. La prima riga ha di solito come valori i nomi delle colonne, e prende il nome di header (intestazione). I valori sono omogenei per colonna, tutti numerici, tutti alfanumerici, tutti logici (True/False). Nel caso in cui un file CSV usi come separatore la virgola, se per coerenza fosse necessario inserire un valore con la virgola si potrebbero usare i doppi apici per indicare l'intero valore. Esempio, "Congo, Democratic Republic of the", CO, ... In questo caso nei doppi apici viene indicato l'intero valore. Rimane il problema se un valore ha all'interno anche i doppi apici. Esempio, Jhon Western, detto "The Hunter"; Bill Thompson l'amico fraterno... La soluzione è l'escaping, ovvero l'uso di un carattere speciale detto escape, che dice al computer di interpretare il seguente valore come puro e semplice carattere senza alcun significato.La maggior parte delle volte il valore di escape è il back slash . Ritornando all'esempio di prima, "Jhon Western, detto"The Hunter"; Bill Thompson l'amico fraterno". E se il valore contiene un backslash? Basta inserire un backslash prima del backslash, (\\). In ogni caso se volessi modificare un dataset alla sua fonte, prima salvare una copia per non perdere valori e non perdere tutti i dati.
+
+### Lettura di un dataset CSV
+
+Per la lettura di un file CSV su R Studio, si usa la funzione R: read.csv("nome del percorso del file"). Un sito dove trovare open data ben fatti è "Open Data Milano" con dati forniti dal Comune di Milano. Rifare gli esercizi con dataset diversi. La funzione read.csv() è preinstallata in R Studio, essa consente la lettura di un file csv e la creazione di un relativo dataframe. Invece, la funzione read_csv() è contenuta nella libreria "tidyverse" e permette di fare la stessa cosa, è contenuta nel pacchetto "readr". Quindi, read_delim() è la funzione più generale ma bisogna indicare il delimitatore nell'argomento. Questa è, invece, la funzione specifica per csv che assume come delimitatore la virgola. Mentre read_csv2() presuppone come separatore il punto e virgola. Creiamo un data frame:
+
+```{r Funzione read_csv}
+country <- read.csv("/Users/danieleiacobone/Desktop/tdo/dataset/Country_Region_Continent.csv")
+head(country)
+```
+
+Vengono fornite informazioni riguardo le righe, le colonne, il tipo di delimitatore e viene specificato anche qual è il tipo di dati, in questo caso caratteri. Il dataset però considera caratteri anche i valori alfanumerici, questo impedisce di farci fare dei calcoli. "NA" vuol dire che non sono presenti valori in quella determinata cella, sono valori mancanti. Fare attenzione al percorso del file a non sbagliarlo. Se uso un file con un delimitatore diverso, viene comunque letto e non da errore, tuttavia viene fuori che c'è una sola colonna.
+
+### Definire le cartelle di lavoro
+
+Per definire che una cartella deve essere la cartella di lavoro o working directory folder, è sufficiente cliccare sulla cartella e l'impostazione "Set as working directory".
+
+## Statistiche descrittive
+
+Dopo la lettura di un dataset, tenendo conto della documentazione di accompagnamneto, bisogna capire il significato di ogni colonna. Con che tipo di dati stiamo lavorando? La prima attivitò è capire le caratteristiche generali dei dati, la loro organizzazione, alcune info sui valori, in particolare numerici. EDA sta per Exploratory Data Analysis, le statistiche descrittive sono importanti perchè i dataset reali sono spesso troppo grandi per poter fare una verifica a vista dei valori delle colonne.
+
+### Analisi dei valori mancanti
+
+Un valore mancante può essere causa di svariati problemi, sia di calcolo, sia di valutazione. Per questa ragione, la presenza di valori mancanti va sempre analizzata. Se presenti bisgona decidere tra tre alternative:
+
+-   Scrivere un valore laddove manca (con quale criterio e con quali conseguenze?)
+
+-   Cancellare eventuali righe (osservazioni) oppure le colonne (variabili) dove sono presenti (con quali conseguenze?)
+
+-   Non fare modifiche ai dati e gestirli di volta in volta per le singole operazioni.
+
+In un progetto di data science niente ha più importanza dell'integrità e coerenza dei dati. Corrompere i dati è la cosa più grave, se fatto senza una logica.
+
+### Funzioni per statistiche descrittive
+
+1.  summary(), questa funzione restituisce per ogni colonna informazioni di base, come il tipo di valore e la moda, la media, la mediana, il minimo, il massimo. Indica anche in valori NA, ma solo per i valori numerici, non di tipo carattere
+
+2.  str(), questa funzioni da info di tipo generale tra cui dimensione, elenco delle colonne con i nomi, tipo di valore e i primi valori per ogni colonna.
+
+3.  view(), funzione che da output in forma tabellare con alcune funzioni simili a spreadsheet, poco utili per dataset grandi, utile per avere una visione generale del dataset.
+
+4.  head() e tail(), forniscono, rispettivamente, le prime e le utilme righe.
+
+5.  unique(), funzione comoda perchè dato l'elenco, fa vedere i valori unici. Per indicare la variabile di nostra interesse, utilizzare il simbolo \$ dopo il nome del dataframe, come nell'esempio.
+
+```{r Unique}
+unique(country$region)
+```
+
+6.  names(), funzione semplice che restituisce i nomi delle colonne di un data frame.
+
+```{r Names}
+names(country)
+```
+
+7.  class(), funzione che indica il tipo di valore di un certo oggetto.
+
+```{r Class}
+class(country$region.code)
+```
+
+8.  length(), funzione che restituisce la lunghezza, numero di elementi di un certo oggetto.
+
+```{r Length}
+length(country) # Lunghezza del dataframe = numero colonne
+length(country$region) # Lunghezza colonna = numero righe
+```
+
+9.  nrow(), fornisce il numero di righe
+
+10. ncol(), fornisce il numero di colonne
+
+## Operazioni su data frame
+
+### Selezione di colonne
+
+Dopo aver fatto l'analisi iniziale sul dataframe, può essere utile selezionare un determinato insieme di colonne. In R c'è la funzione select(), immaginiamo di essere interessati solo ad alcune variabili. Vogliamo selezionare ed estrarre solo quelle determinate colonne. Possiamo anche creare un nuovo data frame con solo quelle determinate colonne.
+
+```{r Select}
+df1 <- select(country, "name", "alpha.3", "region")
+summary(df1)
+```
+
+Con questa funzione, però, se dobbiamo selezionare molte colonne le dobbiamo scrivere tutte, con il rischio di commettere errori ortografici e quindi difficili da controllare. Esistono anche modi più semplici. La prima alternativa è quella, anzichè scrivere i nomi delle colonne, scrivere la posizione della colonna.
+
+```{r Opzioni di select}
+df2 <- select(country, 1, 3, 6)
+```
+
+Un'altra alternativa, è quando vogliamo selezionare colonne contingue. Ad esempio, le colonne da name a region. Utilizzando i due punti e il nome o il numero della colonna.
+
+```{r I due punti}
+df3 <- select(country, name:region)
+```
+
+Se, invece, c'è una situazione mista che comprende colonne contigue e non, esiste un altro metodo.
+
+```{r Flessibilità della selezione}
+df3 <- select(country, "name", 6:11)
+```
+
+L'altro caso è quando ci sono tante colonne e le voglio selezionare tutte tranne una, o tranne poche. In questo caso il punto esclamativo corrisponde alla negazione, quindi indica di non selezionare quella determinata colonna, per deselezionare una serie di colonne contigue posso usare anche i nomi delle colonne con i due punti, preceduti dal punto esclamativo. La c è un elenco di valori, e può essere usata nel caso di più elementi.
+
+```{r Negazione durante selezione}
+df4 <- select(country, !"alpha.2")
+df5 <- select(country, !c("alpha.2", "alpha.3"))
+```
+
+Un secondo carattere che interpreta come esclusione è il meno -. Questo si può usare anche con più colonne da non selezionare. Posso usare anche i due punti, a patto di mettere le parentesi dopo il meno.
+
+```{r Altro metodo}
+df6 <- select(country, -"alpha.2", -"alpha.3")
+```
+
+Altre funzioni: everything(), seleziona tutte le colonne. last_col(), seleziona l'ultima colonna. starts_with() e ends_with(), selezionano le colonne che inizano con un certo prefisso o finiscono con un certo suffisso. contains(), seleziona colonna che contengono un certo numero di caratteri.
+
+```{r Starts_with}
+df7 <- select(country, starts_with("alpha"))
+# Crea un dataframe con le sole colonne selezionate e che iniziano per "alpha"
+```
+
+### Rinominare e spostare colonne
+
+Ora che abbiamo selezionato solo quelle determinate colonne di nostro interesse, potremmo essere interessati a rinominare e spostare le colonne per questioni di utilità o necessità. In tal caso, le due funzioni utili in questo caso sono: rename() e relocate(). Per rinominare va prima il nuovo nome = vecchio nome.
+
+```{r Rinominare colonne}
+df8 <- rename(country, "Nome" = "name", "Regione" = "region", "Alpha2" = "alpha.2", Alpha3 = "alpha.3")
+```
+
+Invece, la funzione relocate() cambia la posizione delle colonne con la stessa sintassi di selct().
+
+```{r Spostare colonne}
+df9 <- relocate(df8, Alpha3, .before = Alpha2)
+df9 <- relocate(df8, Alpha3, .after = Nome)
+```
+
+### Slicing
+
+Con le parentesi quadre posso utilizzare il numero delle colonne per indicare quale colonna selezionare. Questa operazione si chiama slicing, e cioè fare a fette.
+
+```{r Parentesi quadre per selezione}
+head(country[6], 1)
+
+# Oppure
+
+head(country[1:6], 1)
+```
+
+### Come creare o cancellare una colonna
+
+Se vogliamo creare una colonna le diamo un nome e assegnamo un valore
+
+```{r Creare e cancellare colonne}
+# Per creare
+country$Prova = 0
+
+# Per cancellare invece: 
+country$Prova = NULL
+```
+
+#### Esercizio con rilevazione AirBnb
+
+Scarichiamo e leggiamo il dataset AirBnb sulle rilevazioni di Bologna.
+
+```{r Dataset airbnb}
+airbnb_bologna <- read_csv2("/Users/danieleiacobone/Desktop/TDO/dataset/bologna-rilevazione-airbnb.csv")
+```
+
+Usiamo la funzione read_csv2() in quanto il delimatore in questo caso è il punto e virgola ; Cerchiamo maggiori informazioni sul dataset:
+
+```{r Analisi preliminare1}
+head(airbnb_bologna)
+summary(airbnb_bologna)
+```
+
+Ora che abbiamo un idea generale del dataset, come ad esempio informazioni sulla media/ mediana/ max/ min di alcune variabili come prezzo, minimum_nights, number_of_reviews. Vogliamo capire quanti sono i valori unici di alcune variabili, come ad esempio neighbourhood e room_type. Per fare questo usiamo la funzione unique().
+
+```{r Valori unici del dataset}
+unique(airbnb_bologna$neighbourhood)
+
+unique(airbnb_bologna$room_type)
+```
+
+Come possiamo vedere, ci sono 6 tipi di quartiere e ben 4 tiologie di alloggio prenotabili. Ora usiamo la funzione names() e la funzione select() per vedere i nomi e selezionare solo alcune delle colonne di nostro interesse.
+
+```{r Selezione}
+names(airbnb_bologna)
+airbnb2 <- select(airbnb_bologna, 2:6)
+```
+
+La selezione delle colonne può avvenire in diversi modi, come abbiamo precedentemente visto. Ora, creiamo una colonna 'spesa minima' che sarà prezzo a notte x minimo notti, questa è definita colonna calcolata
+
+```{r Creazione colonna da variabili}
+airbnb2$spesa_minima = airbnb2$price * airbnb2$minimum_nights
+#Per cancellare: 
+airbnb2$spesa_minima = NULL
+```
+
+un altro modo per creare una colonna è una funzione, mutate(), indispensabile in alcuni casi.
+
+```{r Funzione mutate}
+airbnb2 <- mutate(airbnb2, spesa_minima = price * minimum_nights)
+```
+
+In questo caso è necessario salvare l esito della funzione in un nuovo dataframe o nello stesso per vedere il risultato.
+
+### Ordinamento delle colonne
+
+La funzione per fare ordinamenti di colonna si chiama arrange(). Inserire il criterio di ordinamento se ascendente o decrescente, in default è crescente Se vogliamo decrescente c'è una funzione, desc()
+
+```{r Arrange}
+airbnb2 <- arrange(airbnb2, desc(price))
+```
+
+Un ordinamento per più colonne è possibile indicando prima il criterio con il quale ordinare es. ordinare prima per quartiere e poi per prezzo decrescente La prima colonna è quella che viene prima ordinata.(In questo caso prima viene ordinato per ordine alfabetico, esempio i quartieri che iniziano per B con il prezzo più alto).
+
+```{r Decrescente}
+airbnb2 <- arrange(airbnb2, neighbourhood, desc(price))
+```
+
+### Separazione di colonne
+
+La funzione utile per separare parti di un valore è separate(), i parametri importanti sono:
+1. col: il nome della colonna il cui valore si vuole separare
+2. into: le colonne risultanti, se un elenco usare c()
+3. sep: il criterio di separazione che può essere un numero, o carattere alfa numerico
+
+### Unione di colonne
+
+La funzione unite(), coi parametri: 
+1. col: il nome della nuova colonna.
+2. se voglio unire tutte le colonne everything(), altrimenti la lista c().
+
+## Condizioni logiche e selezione di righe
+
+### Operatori logici
+
+Gli operatori logici che ci interessano sono tre AND, OR e NOT, con un quarto non fondamentale XOR. L'operazione serve per selezionare delle righe di un data frame in base a specifiche caratteristiche di tipo logico. Un operatore o una funzione che produca un valore TRUE or FALSE è detto operatore booleano, da George Boole, matematico che introdusse un'algebra per l'analisi logica detta algebra di Boole.
+
+-   AND, simbolo &, è un operatore binario (A & B). La condizione composta è vera quando entrambe le condizioni A e B sono contemporaneamente vere. In tutti gli altri casi è falsa (FALSE, 0)
+
+-   OR, simbolo \|, è un operatore binario (A \| B). La condizione composta è falsa quando entra,be sono false. In tutti gli altri casi è vera (TRUE, 1)
+
+-   NOT, simbolo ! o \~, è un operatore unitario (!A), se la condizione è vera, !A restituisce falso e viceversa.
+
+-   XOR, simbolo xor(), è un operatore binario (xor(A,B)), detto OR esclusivo, restituisce vero se A oppure B sono vere, ma non entrambe contemporaneamente. Falso se A e B sono entrambe false o entrambe vere. Si ricava da una combinazione dei precedenti operatori.
+
+Regola di precedenza: AND ha precedenza su OR e XOR, per cui è fondamentale l'uso delle parentesi per definire la logica corretta.
+
+### Selezione di righe con condizione logica
+
+La funzione filter(), è la funzione per l'operazione di righe di selezione da un data frame, è presente nel package dplyr incluso in tidyverse. Il risultato logico di una condizione logica (elenco veri e falsi) si chiama maschera booleana.
+
+```{r Filter}
+filtered_airbnb <- filter(airbnb_bologna, (neighbourhood == "Navile" | neighbourhood == "Santo Stefano") & price < 100)
+head(filtered_airbnb, 4)
+```
+
+## Operazioni su date stringhe e valori mancanti
+
+### Operazioni su date
+
+Per le operazioni su date è utile il pacchetto "lubridate" contenuto nel pacchetto tidyverse. Le date sono informazioni aggregate (giorno, mese, anno, ora, etc.). Dato che hanno caratteristiche particolari, vengono trattate in diversi modo per compiere operazioni di tipo aritmetico e di tipo logico.
+
+```{r Lubridate}
+library(lubridate)
+```
+
+[Cheatsheet per lubridate](https://posit.com/resources/cheatsheets/) disponibile su posit cloud.
+
+Grazie a questo pacchetto possiamo compiere operazioni che ci permettono ad esempio determinare che giorno della settimana è una determinata data, quanti giorni passano tra due date, etc. Una variabile che contiene date viene definita di tipo "data". Esistono diversi modi per come interpretare le date, es. mettere prima il giorno del mese, o prima il mese del giorno (come in USA).
+
+Ci sono due tipi di funzionalita che offre: di trasformazione ad esempio di una colonna di tipo carattere a di tipo data; e funzioni per operazioni data ad esempio estraendo il giorno, il mese, il numero del giorno etc. Le funzioni interpretano i valori alfanumerici secondo lo schema indicato dalle lettere della funzione. Es. ymd_hms(), interpreta anno-mese-giorno, ora-minuti-secondi. L'interpretazione viene trasformata dalla funzione a sua volta mettendo anno-mese-giorno per levare ambiguità, sempre.
+
+```{r Date}
+dmy("05/10/2023")
+mdy("05/10/2023")
+
+# Altri esempi
+
+dmy("20 Sep 2023") # Vengono interpretati anche se le date sono scritte con  abbreviazioni
+
+# Per interpretare altre lingue è necessario scaricare i dizionari con cui si può specificare il parametro locale e indicare quale dizionario usare. 
+dmy("20 luglio 2023", locale = Sys.setlocale("LC_TIME", "it_IT"))
+
+# Legge anche le abbreviazioni nella lingua scelta. 
+```
+
+Come facciamo a trovare il numero di giorni tra due date?
+
+```{r Sottrarre date}
+a <- dmy("20/10/2023") - dmy("01/09/2023")
+```
+
+Ma se volessimo ricavare il numero di giorni tra due date e aggiungere 30 giorni?
+
+```{r Aggiungere giorni}
+a
+a + 30
+```
+
+Non è del tutto logico, non è esattamente un valore. Ci sono funzioni più utili che specificano che quel determinato numero vuol dire un determinato numero di giorni. Se ad esempio scrivessimo a + days(30), da errore perchè oggetti diversi.
+
+```{r Funzioni per date}
+a = dmy("20/10/2023")
+b = dmy("01/09/2023")
+days(a - b)
+```
+
+Il risultato è in una forma differente, ma è più utile.
+
+```{r Funzione month, year}
+ab = filter(airbnb_bologna, month(last_review) == 08 & year(last_review) == 2022)
+```
+
+Come faccio a selezionare solo una stagione con un filtro? Ad esempio sono interessato solo agli airbnb con certe condizioni che siano stati recensiti in date estive.
+
+```{r Condizioni logiche esercizio}
+b = filter(airbnb_bologna, (day(last_review) > 21 & month(last_review) == 06) | (day(last_review) < 21 & month(last_review) == 09) | (month(last_review) == 07 | month(last_review) == 08))
+```
+
+In questo modo includo gli airbnb che sono stati recensiti nel mese di giugno con data maggiore del 21, i mesi di luglio e agosto, e infine, il mese di settembre con i giorni fino a settembre 21.
+
+### Operazioni su stringhe
+
+Per le operazioni su stringhe invece esistono diverse funzioni utili. La library(stringr) contiene un set di funzioni per lavorare sulle stringhe. Guardare il cheatsheet apposito.
+
+#### Esercizio Voli USA
+
+```{r Dataset voli}
+voli <- read_csv("/Users/danieleiacobone/Desktop/tdo/dataset/Flights22jan.csv")
+```
+
+Guardare la documentazione che descrive il dataset, che contiene informazioni utili su abbreviazioni, tipi di dati, etc.
+
+Ora, vogliamo trovare i voli partiti dalla california e diretti a New York City. Dopo aver controllato i nomi delle varie variabili proseguiamo con la condizione logica.
+
+```{r Filtri} 
+a1 = filter(voli, (OriginStateName == "California") & (DestCityName == "New York, NY"))
+```
+
+Ora, vogliamo i voli che sono partiti dall'aeroporto principale di LA o San Francisco e in arrivo a New York.
+
+```{r Es1}
+a2 = filter(voli, (Origin == "LAX" | Origin == "SFO") & (DestCityName == "New York, NY"))
+```
+
+Quando faccio un'operazione bisogna controllare che il risultato sia corretto.
+
+```{r Check result1}
+unique(a2$Origin)
+```
+
+Ora, vogliamo sempre partenza uguale, però arrivo nello stato di new york, ma non l'aereoporto di Laguardia LGA.
+
+```{r Es2}
+a3 = filter(voli, (Origin == "LAX" | Origin == "SFO") & (DestStateName == "New York" & Dest != "LGA"))
+```
+
+```{r Check result 2}
+unique(a3$Dest)
+```
+
+Come vediamo dal risultato, l'aereoporto LGA non è stato incluso. Ora, vogliamo anche info riguardo le date di FlightDate, vogliamo tutti i voli della prima settimana di gennaio dal 1 al 7 oltre alle condizioni precedenti.
+
+```{r Es3}
+a4 <- filter(voli, (Origin == "LAX" | Origin == "SFO") & (DestStateName == "New York" & Dest != "LGA") & (FlightDate >= "2022-01-01" & FlightDate <= "2022-01-07"))
+```
+
+```{r Check result3}
+unique(a4$FlightDate)
+```
+
+In questo modo abbiamo incluso i voli in quelle determinate date, con le condizioni precedenti. Ora vogliamo includere anche la settimana dal 25 al 31.
+
+```{r Es4}
+a5 = filter(voli, (Origin == "LAX" | Origin == "SFO") & (DestStateName == "New York" & Dest != "LGA") & ((FlightDate >= "2022-01-01" & FlightDate <= "2022-01-07") | (FlightDate >= "2022-01-25" & FlightDate <= "2022-01-31")))
+```
+
+```{r Check result4}
+unique(a5$FlightDate)
+```
+
+A questo punto vogliamo considerare anche i ritardi. Di questi voli, vogliamo solo i voli che sono arrivati in ritardo con almeno mezz'ora.
+
+```{r Es5}
+a6 = filter(voli, (Origin == "LAX" | Origin == "SFO") & (DestStateName == "New York" & Dest != "LGA") & ((FlightDate >= "2022-01-01" & FlightDate <= "2022-01-07") | (FlightDate >= "2022-01-25" & FlightDate <= "2022-01-31")) & (ArrDelay > 30))
+```
+
+Ora, vogliamo però considerare gli effettivi ritardi, cioè quelli che sono partiti in orario con al massimo 5 minuti di ritardo e sono arrivati in ritardo.
+
+```{r Es6}
+a7 = filter(voli, (Origin == "LAX" | Origin == "SFO") & (DestStateName == "New York" & Dest != "LGA") & ((FlightDate >= "2022-01-01" & FlightDate <= "2022-01-07") | (FlightDate >= "2022-01-25" & FlightDate <= "2022-01-31")) & ((ArrDelay > 30) & DepDelay <= 5))
+```
+
+### Operazioni su valori mancanti
+
+Sono tipologie di dati che hanno bisogno di funzioni specifiche perchè hanno delle caratteristiche specifiche. I valori mancanti sono degli elementi privi di valore, che mancano. Vanno sempre presi in considerazioni e bisgona decidere cosa fare, si trovano in qualsiasi tipo di dataset. Ci sono delle funzioni specifiche per trattare i valori mancanti. Torniamo all'esempio dei voli. Ci sono valori mancanti? La funzione is.na(), da come output valori TRUE/FALSE per ogni elemento del dataset. Le funzioni che iniziano per is. sono funzioni di verifica, che servono a porre una domanda. Per convenzione generale, i valori booleani vengono interpretati anche come valori numerici: TRUE = 1, FALSE = 0
+
+```{r Sum is.na}
+sum(is.na(voli$DepDelay))
+```
+
+Con questa funzione riesco a vedere il numero totale di osservazioni NA nella colonna selezionata.
+
+La funzione any() in combinazione con is.na() fornisce una risposta sulla presenza o meno di valori mancanti nel dataset.
+
+```{r Any is.na}
+any(is.na(voli))
+any(is.na(voli$FlightDate))
+```
+
+C'è una funzione che fa la somma delle colonne numeriche di un dataframe. Fornisce un resoconto completo con le colonne con determinati valori mancanti. Uso anche la funzione head() o tail(), altrimenti nella visualizzazione PDF occupa troppo spazio di output.
+
+```{r colSums}
+tail(colSums(is.na(voli)))
+```
+
+In alternativa si può usare la funzione all()
+
+#### Sostituzione dei valori mancanti
+
+La prima soluzione non prevede l'uso di funzioni e consiste nel selezionare i valori mancanti e sostituirli con un valore. 
+es.
+df$"ABC"[is.na(df"ABC")] = 0
+
+Una soluzione per la trattare i valori mancanti è sostituirli ad esempio con la loro media. La funzione replace.na, è presente nel pacchetto tydr. Ad esempio, vogliamo sostituire i valori mancanti con la media. Usiamo la funzione mean(), e la funzione na.rm = TRUE che ignora i valori mancanti nel calcolo della media.
+
+```{r replace_na}
+media <- mean(voli$AirTime, na.rm = TRUE)
+head(replace_na(voli$AirTime, media))
+```
+
+In questo modo abbiamo sostituito tutti i valori mancanti nella varabile AirTime, che indica il tempo di volo, con il valore medio di tutti i tempi di volo. Questo era un esempio e bisogna interrogarsi bene prima di modificare i dati in modo definitivo.
+
+#### Eliminare le righe contenenti i valori mancanti
+
+Prima di fare questa operazione bisogna interrogarsi bene, se quella riga contiene informazioni importanti saranno cancellate definitivamente dal dataset. Per farlo, dato che is.na() fornisce una maschera booleana, useremo la funzione filter(), per selezionare solo le righe che NON hanno i valori NA.
+
+```{r Eliminare NAs}
+a1 <- head(filter(voli, !is.na(FirstDepTime))) %>%
+  select(1,2,3, "FirstDepTime")
+```
+
+Quello che stiamo dicendo in questo caso, è che vogliamo head(), quindi le prime righe del dataset voli, e non vogliamo che la colonna selezionata non abbia valori mancanti (quindi viene esclusa la riga intera). Un altro caso.
+
+```{r Selezione di valori non mancanti}
+a2 <- filter(voli, !(is.na(FirstDepTime) | is.na(NASDelay))) %>%
+  select(1,2,"FirstDepTime", "NASDelay")
+```
+
+La funzione na.omit produce lo stesso effetto, ma applicato all'intero dataset.
+
+```{r na.omit}
+a3 <- na.omit(voli)
+```
+
+### Trasformazioni tipo di dato
+
+| Tipi      | Descrizione                                | Funzione di verifica | Funzione di trasformazione |
+|------------------|------------------|------------------|------------------|
+| Logical   | Dati booleani (TRUE, FALSE)                | is.logical()         | as.logical()               |
+| Numeric   | Dati numerici generici                     | is.numeric()         | as.numeric()               |
+| Double    | Dati numerici in doppia precisione         | is.double()          | as.double()                |
+| Integer   | Dati numerici interi                       | is.integer()         | as.integer()               |
+| Character | Dati alfanumerici                          | is.character()       | as.character()             |
+| List      | Liste (vettori, matrici)                   | is.list()            | as.list()                  |
+| Factor    | Valori categorici, numerici o alfanumerici | is.factor()          | as.factor                  |
+
+#### Date, stringhe e valori mancanti
+
+```{r Dataset eust}
+eust <- read_tsv("/Users/danieleiacobone/Desktop/tdo/dataset/sdg_07_11.tsv")
+```
+
+Questo dataset raccoglie informazioni sull'utilizzo dell'energia da parte dei consumatori finali. La prima colonna mette insieme un codice, e la seconda parte il codice degli stati europei
+
+```{r Analisi preliminare}
+names(eust)
+colSums(is.na(eust))
+```
+
+Guardando il dataset notiamo che però i due punti sono al posto dei valori mancanti. Dobbiamo quindi sostituire i : con NA. Questa è un operazione di manipolazione di stringhe, definite nel package stringr. Scaricare i vari cheatsheet.
+
+```{r Stringr}
+library(stringr)
+eust$"2000" <- str_replace_all(eust$'2000', ":", "")
+
+# Convertiamo la colonna 2000, da carattere a numerica
+
+a <- as.numeric(eust$"2000")
+
+# Alterare in questo modo i dati è un errore grave perchè perdo eventuali valori numerici con magari un carattere associato. 
+
+sum(is.na(a))
+
+# Nel dataset originale i : erano 9?
+filter(eust, '2000' == ":")
+```
+
+```{r Operazioni su stringhe}
+sum(str_detect(eust$'2000', '[:punct:]'))
+# Il risultato dice che nel dataset qualsiasi elemento ha un carattere di punteggiatura. Questo perche il punto è usato come simbolo decimale. 
+
+sum(str_detect(eust$'2000', '[:punct:--.]')) # 6 elementi con la punteggiatura che non è il punto
+sum(str_detect(eust$'2000', '[a-zA-Z]')) # 3 elementi con i caratteri
+
+```
+
+```{r str_detect}
+filter(eust, str_detect(eust$'2000', '[a-zA-Z]'))
+```
+
+Ora dobbiamo cancellare lo spazio e il carattere negli elementi che hanno dato questo risultato.
+
+```{r str_replace_all}
+eust$'2000' <- str_replace_all(eust$"2000", '[ a-zA-z]', '')
+eust$'2000' <- as.numeric(eust$"2000")
+```
+
+In questo caso non ho convertito i dati a caso in numeric ma ho prima analizzato il problema senza sovrascrivere dei valori legittimi.
+
+### Pipe lines
+
+Le pipe lines permettono di fare in maniera automatica piu passagg. Sono scritte con la dicitura %\>%. Non serve specificare per ogni funzione i dati utilizzati, in quanto fanno riferimento sempre ai dati originari.
+
+```{r Pipe lines}
+a1 <- voli %>% 
+  filter((Origin == "LAX" | Origin == "SFO") & (DestCityName == "New York, NY")) %>%
+  arrange(desc(DepDelay)) %>%
+  select(1,2, DepDelay)
+```
+
+Grazie alle pipe line evito, quindi, di salvare ogni volta lo stesso dataframe per fare una sequenza di operazioni diverse, risparmiando tempo. Vantaggi: è utile se siamo interessati al risultato finale e non i risultati parziali di ogni singola funzione; la scrittura diventa più compatta. Svantaggi: non vengono salvati i risultati parziali; nel caso di errore nell'output la pipe viene considerata come unica operazione quindi non dice quale parte dell'istruzione contiene l'errore. Fino a 10 istruzioni in pipe è gia abbastanza.
+
+## Operazioni di pivoting
+
+### Traformazioni wide-long
+
+```{r Dataset pop}
+pop <- read_csv("/Users/danieleiacobone/Desktop/tdo/dataset/population-and-demography.csv")
+```
+
+I dati di questo dataset non sono organizzati in maniera tidy, ovvero i dati non sono organizzati in modo che ogni riga corrisponda, ad esempio, ad una nazione ed ogni colonna ad una singola proprietà. Le colonne sono spesso organizzate in formato long and wide. Formato long, laddove si ha una variabile con i valori che definiscono il valore della variabile e poi ulteriori informazioni, es. la colonna anno. Nel formato wide invece, le colonne non rappresentano una proprietà, ma dei valori.
+
+Adesso, trasfromiamo la colonna year da formato long, a formato wide. Cioè i valori unici della colonna year diventeranno delle colonne. Due funzioni utili sono pivot_longer e pivot_wider. id_cols: è l'opzione con cui si specifica quale o quali colonne si vogliono mantenere non modificate. names_from: parametro che ci chiede da dove prendere i nomi delle nuove colonne. value_from: è il parametro che ci permette di dire quali valori associare alle nuove colonne.
+
+```{r pivot_wider}
+pop2 <- pivot_wider(pop, id_cols = "Country name", 
+            names_from = "Year", 
+            values_from = "Population under the age of 25") %>%
+  view()
+```
+
+Oppure
+
+```{r Altro esempio}
+pop %>%
+  pivot_wider(id_cols = "Year",
+              names_from = "Country name",
+              values_from = "Population") %>%
+  view()
+```
+
+Ora un operazione di pivot_longer. cols: parametro per indicare quali sono le colonne da trasformare, le altre rimangono cosi come sono. names_to e values_to sono i nomi e valori delle due nuove colonne, ma non sono necessari da indicare, vengono messi valori standard.
+
+```{r pivot_longer}
+pop2 %>%
+  pivot_longer(cols = 2:152, # Da colonna X a colonna Y
+               names_to = "Anni",
+               values_to = "Pop < 25") %>%
+  view()
+```
+
+## Gruppi e operazioni su gruppi 
+
+Raggruppare è utile per svolgere alcune operazioni su dei sottoinsiemi di un determinato dataset. Esempio, potremmo voler calcolare la somma di persone della popolazione che rispetta anche determinati criteri. 
+Questi sono raggruppamenti logici, esempio, l'indice di un libro è quello che si trova in alcuni libri alla fine ed è composto da vari termini e difianco è indicato in quale pagina compare quel termine nel libro. 
+Un indice è sia un oggetto fisico (le pagine in piu nel libro), sia un oggetto logico che descrive come sono organizzate le informazioni. 
+
+### Gruppi, aggregazioni e trasformazioni 
+La funzione principale è la funzione group_by(), che specifica come creare l'indice sulla base di quale colonne creare l'indicizzazione. 
+Wsempio, prende i valori unici della colonna indicata, e per ognuna associa il numero di riga che corrisponde al determinato valore. 
+L'indice permette di fare operazioni sulla base della colonna selezionata. 
+
+```{r Dataset ISTAT}
+df <- read_csv2("/Users/danieleiacobone/Desktop/tdo/dataset/Previsioni_comunali_popolazione_per_eta-Province.csv", skip = 1)
+```
+
+```{r Raggruppamento}
+# Operazioni di raggruppamento
+
+# controllo quanti anni contiene il dataset
+unique(df$Anno)
+
+# Proviamo a raggruppare 
+df1 <- df %>%
+  filter(Età != "Tutte le età")
+
+df2 <- df1 %>%
+  group_by(Anno, Provincia)
+
+df3 <- df1 %>%
+  group_by(Anno, Età)
+
+# Vogliamo il tot. per ogni anno e ogni provincia
+df3 <- df1 %>%
+  group_by(Anno, Provincia) %>%
+  summarize(Tot = sum(Totale), 
+            Max = max(Totale), 
+            Mean_mf = mean(Maschi)/mean(Femmine)) %>%
+  arrange(Provincia)
+
+# Con summarize posso usare qualsiasi funzione, es. max, min, mean
+
+df4 <- df1 %>%
+  group_by(Anno, Età) %>%
+  summarize(Mean_mf = mean(Maschi)/mean(Femmine)) %>%
+  arrange(Anno)
+```
+
+Se raggruppassi per Anno, Età e Provincia sarebbe del tutto inutile, perché ci sarebbero 23.540 gruppi. Questo perché queste 3 variabili insieme identificano l'univocacità di ogni riga. 
+Non ci sarebbe nessuna aggregazione. 
+
+```{r Funzione n()}
+df5 <- df1 %>%
+  group_by(Anno, Età) %>%
+  summarise(Numero = n())
+
+# La funzione n() conta le righe e non dipende da nessuna variabile
+```
+
+```{r Parametro funzione arrange()}
+df6 <- df1 %>% 
+  group_by(Anno, Età) %>%
+  summarize(Mean_mf = mean(Maschi)/mean(Femmine)) %>%
+  arrange(desc(Mean_mf), .by_group = TRUE)
+  
+```
+
+### Esercizi su gruppi 
+
+```{r carico dataset sui voli}
+df <- read_csv("/Users/danieleiacobone/Desktop/tdo/dataset/Flights22jan.csv")
+```
+
+```{r Esercizio con raggruppamenti}
+# Ricavare per ogni giorno ritardo medio di partenza e arrivo
+
+library(lubridate)
+
+df %>%
+  group_by(Giorno = day(FlightDate)) %>%
+  summarise(RitPart_medio = mean(DepDelay),
+            RitArr_medio = mean(ArrDelay))
+
+# Il problema è che mi da come valori medio NAs...
+# Per non conisderare i NAs nel calcolo medio uso il parametro na.rm = TRUE
+# Di Default la funzione mean considera i valori mancanti
+
+df %>%
+  group_by(Giorno = day(FlightDate)) %>%
+  summarise(RitPart_medio = mean(DepDelay,
+                                 na.rm = TRUE),
+            RitArr_medio = mean(ArrDelay,
+                                na.rm = TRUE))
+# Salvo
+
+df1 <- df %>%
+  group_by(Giorno = day(FlightDate)) %>%
+  summarise(RitPart_medio = mean(DepDelay,
+                                 na.rm = TRUE),
+            RitArr_medio = mean(ArrDelay,
+                                na.rm = TRUE)) %>%
+  arrange(desc(RitArr_medio))
+
+# Invece che considerare gli US in generale, consideriamo anche lo stato di partenza
+
+df2 <- df %>%
+  group_by(Giorno = day(FlightDate),
+           OriginStateName) %>%
+  summarise(RitPart_medio = mean(DepDelay,
+                                 na.rm = TRUE),
+            RitArr_medio = mean(ArrDelay,
+                                na.rm = TRUE)) %>%
+  arrange(RitArr_medio,.by_group = TRUE)
+
+# Il parametro .by_group if TRUE, will sort first by grouping variable. Applies to grouped data frames only.
+
+# Ora per ogni stato e giorno e compagnia aerea
+
+df %>%
+  group_by(Giorno = day(FlightDate),
+           OriginStateName,
+           Reporting_Airline) %>%
+  summarise(RitPart_medio = mean(DepDelay,
+                                 na.rm = TRUE),
+            RitArr_medio = mean(ArrDelay,
+                                na.rm = TRUE),
+            Num_voli = n())
+
+# la funzione n(), è molto semplice ma molto utile
+# Salviamo 
+
+df2 <- df %>%
+  group_by(Giorno = day(FlightDate),
+           OriginStateName,
+           Reporting_Airline) %>%
+  summarise(RitPart_medio = mean(DepDelay,
+                                 na.rm = TRUE),
+            RitArr_medio = mean(ArrDelay,
+                                na.rm = TRUE),
+            Num_voli = n())
+
+# Ora vogliamo fare una tablella sintetica
+# La funzione slice è molto utile ad esempio se serve un report
+# Per mette di mostrare per ogni gruppo n righe significative
+
+df %>%
+  group_by(Giorno = day(FlightDate),
+           OriginStateName) %>%
+  summarise(RitPart_medio = mean(DepDelay,
+                                 na.rm = TRUE),
+            RitArr_medio = mean(ArrDelay,
+                                na.rm = TRUE),
+            Num_voli = n()) %>%
+  slice_max(order_by = Num_voli, n = 3) 
+
+
+# Qui chiediamo i primi 3 giorni per ogni stato con il maggiore ritardo in arrivo
+# I due parametri da usare sono order_by, che indica la colonna da considerare
+# n = che indica il numero di righe da prendere per il gruppo indicato
+
+df %>%
+  group_by(Giorno = day(FlightDate),
+           OriginStateName) %>%
+  summarise(RitPart_medio = mean(DepDelay,
+                                 na.rm = TRUE),
+            RitArr_medio = mean(ArrDelay,
+                                na.rm = TRUE),
+            Num_voli = n()) %>%
+            mutate(Diff_PartArr = RitPart_medio - RitArr_medio)
+
+# La funzione mutate è utile per creare nuove colonne con anche delle condizioni
+```
+
+```{r slice_max}
+
+# La funzione slice max è molto utile per chiedere le prime righe di un gruppo
+# Guarda il chunk precedente
+```
+
+
+```{r Mutate}
+df <- read_csv2("/Users/danieleiacobone/Desktop/tdo/dataset/Previsioni_comunali_popolazione_per_eta-Province.csv", skip = 1)
+
+df %>%
+  filter(Età != "Tutte le età") %>%
+  group_by(Anno, Provincia) %>%
+  mutate(Tot_AnnoProv = sum(Totale)) %>%
+  mutate(Proporzione = Totale / Tot_AnnoProv)
+```
+
+## Join di data frame
+
+### Che cos'è il join di un dataframe 
+
+Le operazioni di join di dataframe consentono di unire, rispettando le corrispondeze logiche, dataframe diversi. 
+Questo permette di estendere i dati a disposizione associando in maniera coordinata informazioni da fonti diverse in un data frame unico. Il rispetto delle corrispondenze logiche è la caratteristica che distingue le operazioni di join da semplici operazioni di concatenazione secondo righe o colonne di tabelle e matrici. 
+
+### Concetti di base, chiavi di un operazione di join
+
+Confronto tra i dataset del Gini Index e Military spending as share of GDP. 
+La correttezza di un'operazione di join si basa quasi interamente sulla scelta delle variabili da utilizzare per determinare le corrispondenze logiche. 
+Un possibile risultato sarebbe voler ottenre solo quelle nazioni che risultano sia nell'uno che nell'altro dataframe. Oppure si può essere interessati anche alle altre nazioni anche se non hanno una corrispondenza ma ad esempio hanno solo l'indice Gini o solo spese militari. 
+-   inner_join da il primo risultato. 
+-   full_join il secondo risultato. 
+Nel caso in cui ci fossero più di 2 dataset da unire, vanno uniti volta per volta in base a ciò che serve. 
+
+```{r Carico dataset }
+gini <- read_csv("/Users/danieleiacobone/Desktop/tdo/dataset/API_SI.POV.GINI_DS2_en_csv_v2_4651513.csv")
+mil <- read_csv("/Users/danieleiacobone/Desktop/tdo/dataset/military-expenditure-share-gdp.csv")
+
+# Trasformo o tutti e due in formato long o in formato wide per semplificare
+# Portiamo in formato wide il dataset mil
+
+mil2 <- mil %>% 
+  pivot_wider(names_from = Year,
+              values_from = military_expenditure_share_gdp)
+
+sort(unique(mil$Year))
+
+# Selezioniamo solo alcuni anni per semplificare
+mil2 <- select(mil2, 1:2, `2018`:`2020`)
+gini2 <- select(gini, 1:2, `2018`:`2020`)
+```
+
+### Funzioni di join
+
+Ci sono due modi, o usare le funzioni specifiche come inner_join e full_join. Oppure usare un unica funzione dove all'interno dei parametri si specifica che tipo di join fare, join_by. 
+
+```{r inner_join() con nomi nazioni}
+# Facciamo il match sulla base dei nomi della nazione
+# Inner join richiede x, y, e il parametro by = 
+# Con la pipe la x corrisponde al dataset in pipe
+# Dato che in by = mettiamo un elenco mettiamo c() e dentro le due vairabili con =
+gini2 %>% 
+  inner_join(mil2, by = c("Country Name" = "Entity")) %>%
+  view()
+
+# Dato che le variabili anno hanno stesso nome viene aggiunto il suffisso .x e .y
+# Modificicabile
+
+gini2 %>% 
+  inner_join(mil2, by = c("Country Name" = "Entity"),
+             suffix = c(".gini", ".mil"))
+
+```
+
+```{r inner_join() con codici nazioni}
+
+gini2 %>%
+  inner_join(mil2, by = c("Country Code" = "Code"))
+
+# In questo caso con i codici ci sono stati più incroci che sulla base del nome
+# 164 combinazioni trovate rispetto alle 148 di prima
+```
+
+Come si fanno a scoprire le chiavi che non hanno avuto il match?
+Si può usare la full_join che fa vedere anche le righe senza corrispondenza
+
+```{r full_join()}
+# I parametri sono gli stessi
+
+gini2 %>%
+  full_join(mil2, by = c("Country Code" = "Code")) %>%
+  view()
+
+# Ora però ci sono anche tutte quelle del dataset gini che non avevano corrispondenza
+# Dato che viene mantenuta una sola chiave, si può usare parametro keep =
+
+full <- gini2 %>%
+  full_join(mil2, by = c("Country Code" = "Code"),
+            keep = TRUE) %>%
+  view()
+
+# Per vedere i codici che non sono presenti nel primo ma sono nel secondo
+
+full %>%
+  filter((!is.na(Code) & (is.na(`Country Code`))))
+
+# Vanno corretti Kosovo e Taiwan
+```
+
+
+
+
+
+
+
+
+
